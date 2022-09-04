@@ -1,9 +1,9 @@
-# About
-AbaseCode open source project is a set of open source collection . Including the base package , toolkit , security package , token package , payment package , excel package and so on.
+# 关于AbaseCode
+AbaseCode OpenCode是一套开源合集。包括基础包、工具包、安全包、token包、支付包、excel包等。
 
-Open source project components to do out of the box, to facilitate more developers to save duplication of work, more focused on business logic code writing.
+开源项目的组件做到开箱即用，方便更多的开发者节省重复的工作，更专注于业务逻辑代码编写。
 
-I am Jon, a developer who focuses on learning and spreading technical knowledge. I hope these toolkits can help you, and welcome any friends to join this open source project.
+我是Jon，一名全栈开发者，专注于学习和传播技术知识。希望这些工具包能够帮上你，欢迎有的朋友加入这个开源项目。
 
 project homepage : https://abasecode.com
 
@@ -13,12 +13,12 @@ Jon's blog : https://jon.wiki
 
 e-mail: ijonso123@gmail.com
 
-# About abasecode-base-token
-A token base library, based on shiro to achieve login verification.
+# 关于 abasecode-base-token
+一个token库。
 
 
-# Quick Start
-## Step 1: setting the pom.xml add dependency
+# 开始使用
+## Step 1: 配置 pom.xml
 ``` xml
 <dependency>
     <groupId>com.abasecode.opencode</groupId>
@@ -27,7 +27,7 @@ A token base library, based on shiro to achieve login verification.
 </dependency>
 ```
 
-## Step 2: setting application.yaml
+## Step 2: 配置 application.yaml
 ``` yaml
 app:
   token:
@@ -36,8 +36,8 @@ app:
     expire: Integer format. the token expire time (seconds).   
 ```
 
-## Step 3: create ShiroConfig.java in your project
-Note that the shiro function can only be used in the full mode.
+## Step 3: 添加 ShiroConfig.java
+
 ```java
 import com.abasecode.opencode.base.token.auth.AuthFilter;
 import org.apache.shiro.mgt.SecurityManager;
@@ -67,7 +67,7 @@ public class ShiroConfig {
     }
 }
 ```
-## Step 4: add annotation
+## Step 4: 添加注解
 ```java
 @EnableCodeToken
 public class App {
@@ -77,22 +77,21 @@ public class App {
 }
 ```
 
-## Step 5: No more step. enjoy it.
+## Step 5: 完成
 
-## Notice 1: redis need.
-This component uses redis to access related authorization information. Redis must be introduced in the SpringBoot project.
+## 注意点 1: 需要redis
+需要引入redis
 ``` xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-data-redis</artifactId>
 </dependency>
 ```
-## Notice 2: app.token.key and simple mode.
-The default value of app.token.key is "adm-token".
-simple mode: If you don't use shiro's authorization and verification functions, you can use the simple mode.
-Simple mode allows you to use multiple custom keys in a project.
+## 注意点 2: app.token.key 和简单模式。
+app.token.key的默认值是 "adm-token"。
+如果你不使用 shiro 的授权和验证功能，你可以使用简单模式。 简单模式允许你在一个项目中使用多个自定义密钥。
 
-### simple mode example.
+### 示例.
 ``` java
     @Autowired
     TokenHandler tokenHandler;
