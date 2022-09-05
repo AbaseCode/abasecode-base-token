@@ -8,7 +8,7 @@ import com.abasecode.opencode.base.token.entity.TokenInfo;
 import com.abasecode.opencode.base.token.entity.TokenUser;
 import com.abasecode.opencode.base.token.util.CodeRedisUtils;
 import com.abasecode.opencode.base.token.util.TokenKeysUtils;
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -38,6 +38,7 @@ import java.util.Set;
 public class AuthRealm extends AuthorizingRealm {
     @Autowired
     TokenHandler tokenHandler;
+
     @Autowired
     RedisTemplate redisTemplate;
 

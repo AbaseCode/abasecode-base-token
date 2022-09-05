@@ -3,7 +3,7 @@ package com.abasecode.opencode.base.token.auth;
 import com.abasecode.opencode.base.code.CodeException;
 import com.abasecode.opencode.base.code.CodeResult;
 import com.abasecode.opencode.base.util.CodeHttpUtils;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.shiro.authc.AuthenticationException;

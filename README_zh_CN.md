@@ -19,28 +19,46 @@ e-mail: ijonso123@gmail.com
 
 # 开始使用
 ## Step 1: 配置 pom.xml
+配置如下，注意，需要引入redis
 ``` xml
 <dependency>
     <groupId>com.abasecode.opencode</groupId>
     <artifactId>abasecode-base-token</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.3</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
 </dependency>
 ```
 
 ## Step 2: 配置 application.yaml
+配置如下：
+app:auth-filter:annos 无需授权的路径，一行一个。
+app:auth-filter:auths 需要授权认证的路径，一行一个。
 ``` yaml
 app:
-  token:
-    key: String format. the key in redis.
-    secret: String format. the token secret. example: "3d15d32654bc1af61759a3bacbc0c78a"
-    expire: Integer format. the token expire time (seconds).   
+  auth-filter:
+    annos:
+      - /
+      - /login
+    auths:
+      - /user
+      - /system
+  api-token:
+    key: app-name
+    expire: 64800
+    secret: 1829b4abbba0794301a075fc2283d2ba
 ```
 
 ## Step 3: 添加 ShiroConfig.java
-
+以下代码可以直接复制过去使用。
 ```java
+import com.abasecode.opencode.base.token.annotation.EnableCodeToken;
 import com.abasecode.opencode.base.token.auth.AuthFilter;
+import com.abasecode.opencode.base.token.config.TokenConfig;
 import org.apache.shiro.mgt.SecurityManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.springframework.context.annotation.Configuration;
@@ -51,17 +69,26 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Configuration
+@EnableCodeToken
 public class ShiroConfig {
+
+    @Autowired
+    TokenConfig.AuthFilter authFilter;
+
     @Bean("shiroFilter")
     public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilter = new ShiroFilterFactoryBean();
         shiroFilter.setSecurityManager(securityManager);
         Map<String, Filter> filters = new HashMap<>();
-        filters.put("oauth2", new AuthFilter());
+        filters.put("code-auth", new AuthFilter());
         shiroFilter.setFilters(filters);
         Map<String, String> filterMap = new LinkedHashMap<>();
-        filterMap.put("/login", "anon");
-        filterMap.put("/**", "oauth2");
+        for (String a : authFilter.getAnnos()) {
+            filterMap.put(a, "anon");
+        }
+        for (String b : authFilter.getAuths()) {
+            filterMap.put(b, "code-auth");
+        }
         shiroFilter.setFilterChainDefinitionMap(filterMap);
         return shiroFilter;
     }
@@ -79,19 +106,28 @@ public class App {
 
 ## Step 5: 完成
 
-## 注意点 1: 需要redis
-需要引入redis
-``` xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-data-redis</artifactId>
-</dependency>
+## 注意
+### 需要引入Shiro
+使用shiro作为安全组件，需要引入shiro包。
+```xml
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>1.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-web</artifactId>
+            <version>1.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring</artifactId>
+            <version>1.9.1</version>
+        </dependency>
 ```
-## 注意点 2: app.token.key 和简单模式。
-app.token.key的默认值是 "adm-token"。
-如果你不使用 shiro 的授权和验证功能，你可以使用简单模式。 简单模式允许你在一个项目中使用多个自定义密钥。
 
-### 示例.
+### 简单示例
 ``` java
     @Autowired
     TokenHandler tokenHandler;
@@ -100,4 +136,27 @@ app.token.key的默认值是 "adm-token"。
     
     Token token = tokenHandler.createToken(user);
 
+```
+### 关于 TokenUser.java
+```java
+public class TokenUser implements Serializable {
+    // userId
+    private Integer userId;
+    // userName
+    private String userName;
+    // tel or email
+    private String userTel;
+    // login time
+    private LocalDateTime userLoginTime;
+    // 1 表示用户被禁止登录, 0 表示用户允许登录
+    private Integer status;
+    /**
+     * If used simple mode, it's no required.
+     */
+    private Set<String> userPermissionSet;
+    /**
+     * If used simple mode, it's no required.
+     */
+    private Set<String> userRolesSet;
+}
 ```

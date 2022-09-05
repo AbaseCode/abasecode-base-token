@@ -1,18 +1,29 @@
 {
   "properties": [
     {
-      "name": "app.token.key",
+      "name": "app.api-token.key",
       "type": "java.lang.String",
-      "description": "app.token.key. the default value is: adm."
+      "description": "app.api-token.key. the default value is: adm."
     },
     {
-      "name": "app.token.secret",
+      "name": "app.api-token.secret",
       "type": "java.lang.String",
-      "description": "app.token.secret."
+      "description": "app.api-token.secret."
     },
     {
-      "name": "app.token.expire",
+      "name": "app.api-token.expire",
       "type": "java.lang.String",
-      "description": "app.token.expire."
+      "description": "app.api-token.expire."
+    },
+    {
+      "name": "app.auth-filter.annos",
+      "type": "java.util.List<java.lang.String>",
+      "description": "app.auth-filter.annos, it's a String list."
+    },
+    {
+      "name": "app.auth-filter.auths",
+      "type": "java.util.List<java.lang.String>",
+      "description": "app.auth-filter.auths, it's a String list."
     }
-  ] }
+  ]
+}

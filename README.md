@@ -19,28 +19,46 @@ A token base library, based on shiro to achieve login verification.
 
 # Quick Start
 ## Step 1: setting the pom.xml add dependency
+Notice: This component uses redis to access related authorization information. Redis must be introduced in the SpringBoot project.
 ``` xml
 <dependency>
     <groupId>com.abasecode.opencode</groupId>
     <artifactId>abasecode-base-token</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.3</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
 </dependency>
 ```
 
 ## Step 2: setting application.yaml
+like this:
+app:auth-filter:annos fill the paths that do not require authentication, one per line.
+app:auth-filter:auths fill the paths that require authentication, one per line.
 ``` yaml
 app:
-  token:
-    key: String format. the key in redis.
-    secret: String format. the token secret. example: "3d15d32654bc1af61759a3bacbc0c78a"
-    expire: Integer format. the token expire time (seconds).   
+  auth-filter:
+    annos:
+      - /
+      - /login
+    auths:
+      - /user
+      - /system
+  api-token:
+    key: app-name
+    expire: 64800
+    secret: 1829b4abbba0794301a075fc2283d2ba
 ```
 
 ## Step 3: create ShiroConfig.java in your project
 Note that the shiro function can only be used in the full mode.
 ```java
+import com.abasecode.opencode.base.token.annotation.EnableCodeToken;
 import com.abasecode.opencode.base.token.auth.AuthFilter;
+import com.abasecode.opencode.base.token.config.TokenConfig;
 import org.apache.shiro.mgt.SecurityManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.springframework.context.annotation.Configuration;
@@ -51,17 +69,26 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Configuration
+@EnableCodeToken
 public class ShiroConfig {
+
+    @Autowired
+    TokenConfig.AuthFilter authFilter;
+
     @Bean("shiroFilter")
     public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilter = new ShiroFilterFactoryBean();
         shiroFilter.setSecurityManager(securityManager);
         Map<String, Filter> filters = new HashMap<>();
-        filters.put("oauth2", new AuthFilter());
+        filters.put("code-auth", new AuthFilter());
         shiroFilter.setFilters(filters);
         Map<String, String> filterMap = new LinkedHashMap<>();
-        filterMap.put("/login", "anon");
-        filterMap.put("/**", "oauth2");
+        for (String a : authFilter.getAnnos()) {
+            filterMap.put(a, "anon");
+        }
+        for (String b : authFilter.getAuths()) {
+            filterMap.put(b, "code-auth");
+        }
         shiroFilter.setFilterChainDefinitionMap(filterMap);
         return shiroFilter;
     }
@@ -79,20 +106,29 @@ public class App {
 
 ## Step 5: No more step. enjoy it.
 
-## Notice 1: redis need.
-This component uses redis to access related authorization information. Redis must be introduced in the SpringBoot project.
-``` xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-data-redis</artifactId>
-</dependency>
-```
-## Notice 2: app.token.key and simple mode.
-The default value of app.token.key is "adm-token".
-simple mode: If you don't use shiro's authorization and verification functions, you can use the simple mode.
-Simple mode allows you to use multiple custom keys in a project.
 
-### simple mode example.
+## Notice
+### Shiro need.
+Using shiro as a security component requires the introduction of the shiro package.
+```xml
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>1.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-web</artifactId>
+            <version>1.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring</artifactId>
+            <version>1.9.1</version>
+        </dependency>
+```
+
+### Simple mode example.
 ``` java
     @Autowired
     TokenHandler tokenHandler;
@@ -101,4 +137,27 @@ Simple mode allows you to use multiple custom keys in a project.
     
     Token token = tokenHandler.createToken(user);
 
+```
+### About TokenUser.java
+```java
+public class TokenUser implements Serializable {
+    // userId
+    private Integer userId;
+    // userName
+    private String userName;
+    // tel or email
+    private String userTel;
+    // login time
+    private LocalDateTime userLoginTime;
+    // 1 is forbidden, 0 is allowed.
+    private Integer status;
+    /**
+     * If used simple mode, it's no required.
+     */
+    private Set<String> userPermissionSet;
+    /**
+     * If used simple mode, it's no required.
+     */
+    private Set<String> userRolesSet;
+}
 ```

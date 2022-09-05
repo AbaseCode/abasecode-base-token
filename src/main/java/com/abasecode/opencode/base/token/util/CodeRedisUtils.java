@@ -1,7 +1,7 @@
 package com.abasecode.opencode.base.token.util;
 
 import com.abasecode.opencode.base.code.CodeException;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
